@@ -1,105 +1,74 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-} | null;
+import { createContext, useContext, useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { User } from '@supabase/supabase-js';
 
 type AuthContextType = {
-  user: User;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  user: User | null;
   isLoading: boolean;
+  logout: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isLoading: true,
+  logout: async () => {},
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
 
-  // Check for existing session on mount
   useEffect(() => {
-    // This would be replaced with actual session validation logic
-    const checkSession = async () => {
-      try {
-        // Simulate checking for a stored session
-        const storedUser = localStorage.getItem('polly_user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error('Session validation error:', error);
-      } finally {
-        setIsLoading(false);
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUser(session.user);
       }
+      
+      setIsLoading(false);
     };
 
-    checkSession();
-  }, []);
+    getUser();
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // This would be replaced with actual authentication logic
-      // Simulate successful login
-      const mockUser = {
-        id: '1',
-        name: 'Test User',
-        email,
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('polly_user', JSON.stringify(mockUser));
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+        router.refresh();
+      }
+    );
 
-  const register = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // This would be replaced with actual registration logic
-      // Simulate successful registration
-      const mockUser = {
-        id: '1',
-        name,
-        email,
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('polly_user', JSON.stringify(mockUser));
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase, router]);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('polly_user');
+  const logout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};
