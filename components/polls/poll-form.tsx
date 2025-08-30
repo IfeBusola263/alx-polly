@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { createPoll } from '@/app/(main)/polls/create/actions';
+import { redirect } from 'next/navigation';
 
 // Submit button with loading state
 function SubmitButton() {
@@ -26,6 +27,7 @@ function SubmitButton() {
 export default function PollForm() {
   const [options, setOptions] = useState(['', '']);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<boolean>(false);
 
   // This function is only used for the dynamic options UI
   // The actual form submission will collect all options from the form data
@@ -49,6 +51,7 @@ export default function PollForm() {
   const clientSubmit = async (formData: FormData) => {
     // Clear any previous errors
     setError(null);
+    setSuccess(false);
     
     // The server action will handle validation and submission
     const result = await createPoll(formData);
@@ -56,8 +59,10 @@ export default function PollForm() {
     // If there's an error, display it
     if (result?.error) {
       setError(result.error);
+    } else {
+      setSuccess(true);
+      redirect('/polls');
     }
-    // No need to handle success case as the server action will redirect
   };
 
   return (
@@ -67,6 +72,11 @@ export default function PollForm() {
       </CardHeader>
       <form action={clientSubmit}>
         <CardContent className="space-y-6">
+          {success && (
+            <div className="text-green-500 text-center text-lg font-semibold mb-4">
+              Poll created successfully!
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="title">Poll Question</Label>
             <Input

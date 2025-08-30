@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="text-center text-sm text-muted-foreground md:text-left">
           &copy; {new Date().getFullYear()} Polly. All rights reserved.
         </div>
-        <div className="flex gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-6 text-sm text-muted-foreground">
           <a href="#" className="hover:underline hover:text-foreground">Terms</a>
           <a href="#" className="hover:underline hover:text-foreground">Privacy</a>
           <a href="#" className="hover:underline hover:text-foreground">Contact</a>

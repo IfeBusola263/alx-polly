@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import PollActions from '@/components/polls/poll-actions';
+import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PollVote from '@/components/polls/poll-vote';
 import PollResults from '@/components/polls/poll-results';
@@ -13,6 +14,10 @@ export default async function PollPage({ params }: { params: { id: string } }) {
   // Get the current user
   const supabaseClient = supabase;
   const { data: { user } } = await supabaseClient.auth.getUser();
+
+  //  Get Poll Id
+  const routeParams = await params;
+  const pollId = routeParams.id;
   
   // Fetch the poll with its options
   const { data: pollData, error: pollError } = await supabase
@@ -26,7 +31,7 @@ export default async function PollPage({ params }: { params: { id: string } }) {
       expires_at,
       poll_options (id, text, votes)
     `)
-    .eq('id', params.id)
+    .eq('id', pollId)
     .single();
   
   if (pollError || !pollData) {
@@ -39,7 +44,7 @@ export default async function PollPage({ params }: { params: { id: string } }) {
     const { data: voteData } = await supabase
       .from('votes')
       .select()
-      .eq('poll_id', params.id)
+      .eq('poll_id', pollId)
       .eq('user_id', user.id)
       .single();
     
@@ -71,10 +76,15 @@ export default async function PollPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="container max-w-3xl py-8 space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" asChild>
           <Link href="/polls">← Back to Polls</Link>
         </Button>
+        <PollActions
+          pollId={poll.id}
+          createdBy={poll.createdBy}
+          currentUserId={user?.id}
+        />
       </div>
       
       <Card>
