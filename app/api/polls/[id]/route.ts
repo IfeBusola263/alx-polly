@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPollById } from '@/data/mock-polls';
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/polls/[id] - Get a specific poll by ID
 export async function GET(
@@ -9,9 +9,13 @@ export async function GET(
   try {
     const { id } = params;
     
-    // This is a placeholder for actual database query
-    // In a real implementation, you would fetch the poll from a database
-    const poll = getPollById(id);
+    const supabase = await createClient();
+    const { data: poll, error } = await supabase.from('polls').select('*').eq('id', id).single();
+
+    if (error) {
+      console.error('Error fetching poll:', error);
+      return NextResponse.json({ success: false, message: 'Failed to fetch poll' }, { status: 500 });
+    }
     
     if (!poll) {
       return NextResponse.json(
@@ -32,66 +36,96 @@ export async function GET(
     );
   }
 }
+  
 
-// PATCH /api/polls/[id] - Update a poll
-export async function PATCH(
+export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  try {
-    const { id } = params;
-    const body = await request.json();
-    
-    // This is a placeholder for actual poll update logic
-    // In a real implementation, you would:
-    // 1. Validate the input data
-    // 2. Check if the poll exists
-    // 3. Update the poll in the database
-    // 4. Return the updated poll
-    
-    // Mock successful poll update
-    const updatedPoll = {
-      id,
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
-    
-    return NextResponse.json({
-      success: true,
-      data: updatedPoll,
-    });
-  } catch (error) {
-    console.error('Error updating poll:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to update poll' },
-      { status: 400 }
-    );
+  const { id } = params;
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const { title, description, options, expiresAt } = await request.json();
+
+  // Basic validation
+  if (!title || !options || options.length < 2) {
+    return NextResponse.json({ error: 'Title and at least two options are required.' }, { status: 400 });
+  }
+
+  const { data: existingPoll, error: fetchError } = await supabase
+    .from('polls')
+    .select('createdBy')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !existingPoll) {
+    return NextResponse.json({ error: 'Poll not found.' }, { status: 404 });
+  }
+
+  if (existingPoll.createdBy !== user.id) {
+    return NextResponse.json({ error: 'Forbidden: You do not own this poll.' }, { status: 403 });
+  }
+
+  const { data, error } = await supabase
+    .from('polls')
+    .update({
+      title,
+      description,
+      options,
+      expiresAt,
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating poll:', error);
+    return NextResponse.json({ error: 'Failed to update poll.' }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
 }
 
-// DELETE /api/polls/[id] - Delete a poll
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params;
-    
-    // This is a placeholder for actual poll deletion logic
-    // In a real implementation, you would:
-    // 1. Check if the poll exists
-    // 2. Check if the user has permission to delete the poll
-    // 3. Delete the poll from the database
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Poll deleted successfully',
-    });
-  } catch (error) {
-    console.error('Error deleting poll:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to delete poll' },
-      { status: 500 }
-    );
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const { data: existingPoll, error: fetchError } = await supabase
+    .from('polls')
+    .select('createdBy')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !existingPoll) {
+    return NextResponse.json({ error: 'Poll not found.' }, { status: 404 });
+  }
+
+  if (existingPoll.createdBy !== user.id) {
+    return NextResponse.json({ error: 'Forbidden: You do not own this poll.' }, { status: 403 });
+  }
+
+  const { error } = await supabase
+    .from('polls')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting poll:', error);
+    return NextResponse.json({ error: 'Failed to delete poll.' }, { status: 500 });
+  }
+
+  return NextResponse.json({ message: 'Poll deleted successfully.' });
 }

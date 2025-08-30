@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { createPoll } from '@/app/(main)/polls/create/actions';
+import { updatePoll } from '@/app/(main)/polls/[id]/edit/actions';
 import { redirect } from 'next/navigation';
 
 // Submit button with loading state
-function SubmitButton() {
+function SubmitButton({ initialData }: { initialData?: Poll }) {
   const { pending } = useFormStatus();
   
   return (
@@ -19,13 +20,19 @@ function SubmitButton() {
       disabled={pending}
       className="w-full"
     >
-      {pending ? 'Creating...' : 'Create Poll'}
+      {pending ? (initialData ? 'Updating...' : 'Creating...') : (initialData ? 'Update Poll' : 'Create Poll')}
     </Button>
   );
 }
 
-export default function PollForm() {
-  const [options, setOptions] = useState(['', '']);
+import { Poll } from '@/types';
+
+interface PollFormProps {
+  initialData?: Poll;
+}
+
+export default function PollForm({ initialData }: PollFormProps) {
+  const [options, setOptions] = useState(initialData?.options?.map(opt => opt.text) || ['', '']);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -54,7 +61,12 @@ export default function PollForm() {
     setSuccess(false);
     
     // The server action will handle validation and submission
-    const result = await createPoll(formData);
+    let result;
+    if (initialData) {
+      result = await updatePoll(initialData.id, formData);
+    } else {
+      result = await createPoll(formData);
+    }
     
     // If there's an error, display it
     if (result?.error) {
@@ -68,7 +80,7 @@ export default function PollForm() {
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl">Create a New Poll</CardTitle>
+        <CardTitle className="text-2xl">{initialData ? 'Edit Poll' : 'Create a New Poll'}</CardTitle>
       </CardHeader>
       <form action={clientSubmit}>
         <CardContent className="space-y-6">
@@ -84,6 +96,7 @@ export default function PollForm() {
               name="title"
               placeholder="What is your favorite programming language?"
               required
+              defaultValue={initialData?.title}
             />
           </div>
 
@@ -93,6 +106,7 @@ export default function PollForm() {
               id="description"
               name="description"
               placeholder="Provide more context for your poll"
+              defaultValue={initialData?.description}
             />
           </div>
 
@@ -135,6 +149,7 @@ export default function PollForm() {
               id="expiresAt"
               name="expiresAt"
               type="datetime-local"
+              defaultValue={initialData?.expiresAt ? new Date(initialData.expiresAt).toISOString().slice(0, 16) : ''}
             />
           </div>
         </CardContent>
@@ -142,7 +157,7 @@ export default function PollForm() {
           {error && (
             <div className="text-destructive text-sm mb-2">{error}</div>
           )}
-          <SubmitButton />
+          <SubmitButton initialData={initialData} />
         </CardFooter>
       </form>
     </Card>
