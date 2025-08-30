@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import PollForm from '@/components/polls/poll-form';
 import ProtectedRoute from '@/components/auth/protected-route';
 
+
 export default function CreatePollPage() {
 
   return (

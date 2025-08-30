@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Poll, PollOption } from '@/types';
 
 export default async function PollsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Fetch polls with their options
   const { data: pollsData, error } = await supabase

@@ -8,10 +8,11 @@ import PollResults from '@/components/polls/poll-results';
 import { Poll, PollOption } from '@/types';
 
 export default async function PollPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Get the current user
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabaseClient = supabase;
+  const { data: { user } } = await supabaseClient.auth.getUser();
   
   // Fetch the poll with its options
   const { data: pollData, error: pollError } = await supabase

@@ -5,10 +5,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function voteOnPoll(pollId: string, optionId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Get the current user
-  const { data: { user } } = await supabase.auth.getUser();
+const supabaseClient = supabase;
+const { data: { user } } = await supabaseClient.auth.getUser();
   
   if (!user) {
     return { error: 'You must be logged in to vote' };

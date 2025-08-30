@@ -5,10 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createPoll(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Get the current user
-  const { data: { user } } = await supabase.auth.getUser();
+const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
     redirect('/login');
