@@ -1,14 +1,19 @@
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import ClientPollActions from './client-poll-actions';
+import { createClient } from '@/lib/supabase/server';
 import { Poll } from '@/types';
 
 type PollCardProps = {
   poll: Poll;
 };
 
-export default function PollCard({ poll }: PollCardProps) {
-  const { id, title, description, createdAt, totalVotes } = poll;
+export default async function PollCard({ poll }: PollCardProps) {
+  const { id, title, description, createdAt, totalVotes, createdBy } = poll;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentUserId = user?.id || null;
   
   // Format date
   const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
@@ -31,6 +36,9 @@ export default function PollCard({ poll }: PollCardProps) {
           <p>{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</p>
         </div>
       </CardContent>
+        {currentUserId === createdBy && poll && (
+          <ClientPollActions poll={poll} currentUserId={currentUserId} />
+        )}
       <CardFooter>
         <Button asChild className="w-full">
           <Link href={`/polls/${id}`}>View Poll</Link>

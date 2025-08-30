@@ -9,12 +9,14 @@ type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   logout: () => Promise<void>;
+  currentUserId: string | null;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   logout: async () => {},
+  currentUserId: null,
 });
 
 export const  AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -49,7 +51,7 @@ export const  AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         }
         setIsLoading(false);
-        router.refresh();
+
       }
     );
 
@@ -64,7 +66,7 @@ export const  AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, logout, currentUserId: user?.id || null }}>
       {children}
     </AuthContext.Provider>
   );

@@ -81,9 +81,10 @@ export default async function PollPage({ params }: { params: { id: string } }) {
           <Link href="/polls">← Back to Polls</Link>
         </Button>
         <PollActions
-          pollId={poll.id}
-          createdBy={poll.createdBy}
-          currentUserId={user?.id}
+          // pollId={poll.id}
+          poll={poll}
+          // createdBy={poll.createdBy}
+          currentUserId={user!.id}
         />
       </div>
       

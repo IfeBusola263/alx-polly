@@ -2,19 +2,26 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
+
+import { createClient } from '@/lib/supabase/browser';
+
+
+import { Poll } from '@/types';
 
 interface PollActionsProps {
-  pollId: string;
-  createdBy: string;
-  currentUserId: string | undefined;
+  poll: Poll;
+  currentUserId: string | null;
 }
 
 export default function PollActions({
-  pollId,
-  createdBy,
+  poll,
   currentUserId,
 }: PollActionsProps) {
+  if (!poll) {
+    return null;
+  }
+  const pollId = poll?.id;
+  const createdBy = poll?.createdBy;
   const router = useRouter();
   const supabase = createClient();
 
