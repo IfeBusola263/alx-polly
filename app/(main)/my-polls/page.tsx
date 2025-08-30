@@ -1,25 +1,26 @@
-'use client';
-
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import PollCard from '@/components/polls/poll-card';
-import { useAuth } from '@/contexts/auth-context';
-import { mockPolls } from '@/data/mock-polls';
 import ProtectedRoute from '@/components/auth/protected-route';
+import { getUserPolls } from './actions';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
-export default function MyPollsPage() {
-  const { user } = useAuth();
-
-  // Filter polls created by the current user
-  // In a real app, this would be fetched from an API
-  const userPolls = mockPolls.filter(poll => poll.createdBy === user?.id);
+export default async function MyPollsPage() {
+  // Fetch polls created by the current user
+  const userPolls = await getUserPolls();
 
   return (
     <ProtectedRoute>
       <div className="container py-8">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold">My Polls</h1>
-            <p className="text-muted-foreground">Manage polls you've created</p>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-bold">My Polls</h1>
+              <p className="text-muted-foreground">Manage polls you've created</p>
+            </div>
+            <Button asChild>
+              <Link href="/polls/create">Create New Poll</Link>
+            </Button>
           </div>
 
           {userPolls.length > 0 ? (

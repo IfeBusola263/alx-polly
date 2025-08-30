@@ -4,7 +4,7 @@ ALX Polly is a modern, interactive polling application built with Next.js and Sh
 
 ## Features
 
-- **User Authentication**: Register, login, and manage user profiles
+- **User Authentication**: Register, login, and manage user profiles using Supabase authentication
 - **Poll Creation**: Create custom polls with multiple options and optional expiration dates
 - **Poll Management**: View, edit, and delete your created polls
 - **Voting System**: Vote on polls with real-time results
@@ -15,8 +15,9 @@ ALX Polly is a modern, interactive polling application built with Next.js and Sh
 - **Frontend**: Next.js 14 with App Router, React, TypeScript
 - **UI Components**: Shadcn UI (built on Radix UI)
 - **Styling**: Tailwind CSS
-- **Authentication**: Custom auth implementation (placeholder for future integration)
-- **API**: Next.js API Routes (placeholders for future backend integration)
+- **Authentication**: Supabase Authentication
+- **Database**: Supabase PostgreSQL
+- **API**: Next.js Server Actions for data mutations
 
 ## Project Structure
 
