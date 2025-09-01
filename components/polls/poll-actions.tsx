@@ -44,7 +44,7 @@ export default function PollActions({ poll, currentUserId }: PollActionsProps) {
 
   return (
     <div className="flex gap-2">
-      <Link href={`/polls/${poll.id}/edit`}>
+      <Link href={`/polls/${poll.id}/edit/`}>
         <Button variant="outline" size="sm">
           Edit
         </Button>

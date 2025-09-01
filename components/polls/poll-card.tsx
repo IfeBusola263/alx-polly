@@ -13,7 +13,7 @@ export default async function PollCard({ poll }: PollCardProps) {
   const { id, title, description, createdAt, totalVotes, createdBy } = poll;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const currentUserId = user?.id || null;
+  const currentUserId = user ? user.id : null;
   
   // Format date
   const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
@@ -36,7 +36,8 @@ export default async function PollCard({ poll }: PollCardProps) {
           <p>{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</p>
         </div>
       </CardContent>
-        {currentUserId === createdBy && poll && (
+        {currentUserId === poll.createdBy && poll && (
+
           <ClientPollActions poll={poll} currentUserId={currentUserId} />
         )}
       <CardFooter>
