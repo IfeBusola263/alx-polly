@@ -166,9 +166,6 @@ We welcome contributions to ALX Polly! Please follow these steps:
 ## Current State
 
 This project is currently in development with placeholder implementations:
-
-- Authentication uses client-side storage (localStorage) for demonstration
-- Poll data is stored in memory using mock data
 - API routes are implemented as placeholders for future backend integration
 
 ## Future Enhancements
