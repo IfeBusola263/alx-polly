@@ -37,8 +37,9 @@ export default async function PollCard({ poll }: PollCardProps) {
         </div>
       </CardContent>
         {currentUserId === poll.createdBy && poll && (
-
-          <ClientPollActions poll={poll} currentUserId={currentUserId} />
+          <div className="flex justify-center px-6 pb-4">
+            <ClientPollActions poll={poll} currentUserId={currentUserId} />
+          </div>
         )}
       <CardFooter>
         <Button asChild className="w-full">
