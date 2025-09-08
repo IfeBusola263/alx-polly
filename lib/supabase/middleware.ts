@@ -1,6 +1,38 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/**
+ * Creates a Supabase server client with cookie management for middleware operations.
+ * 
+ * @description
+ * This middleware is crucial for handling authentication state and session management
+ * in the server-side rendering (SSR) context of the Polly application.
+ * 
+ * Why it's needed:
+ * - Manages authentication cookies across server-side operations
+ * - Ensures session persistence between client and server
+ * - Handles token refresh and session recovery
+ * - Enables protected route access control
+ * 
+ * Assumptions:
+ * - Running in middleware or server component context
+ * - Environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set
+ * - NextRequest object is available
+ * 
+ * Edge Cases:
+ * - Handles cookie expiration and renewal
+ * - Manages concurrent requests with different auth states
+ * - Preserves session during route changes
+ * - Handles missing or invalid cookies
+ * 
+ * Connected Components:
+ * - Used in middleware.ts for route protection
+ * - Powers server-side authentication checks in layout.tsx
+ * - Enables SSR data fetching in protected pages
+ * 
+ * @param request - The incoming Next.js request object
+ * @returns Object containing Supabase client and modified response
+ */
 export const createClient = (request: NextRequest) => {
   // Create an unmodified response
   let response = NextResponse.next({

@@ -1,5 +1,36 @@
 import { Poll } from '@/types';
 
+/**
+ * Mock data and helper functions for poll operations during development.
+ * 
+ * @description
+ * This module provides mock data and utility functions for poll operations,
+ * primarily used during development and testing of the Polly application.
+ * 
+ * Why it's needed:
+ * - Enables development without database dependency
+ * - Provides consistent test data for UI development
+ * - Serves as a reference for expected data structures
+ * - Facilitates rapid prototyping of new features
+ * 
+ * Assumptions:
+ * - Poll structure matches the Poll type definition
+ * - IDs are unique strings
+ * - Dates are ISO format strings
+ * - Vote counts are non-negative integers
+ * 
+ * Edge Cases:
+ * - Handles polls with varying numbers of options
+ * - Manages polls with/without descriptions
+ * - Handles polls with/without expiration dates
+ * - Maintains vote count consistency
+ * 
+ * Connected Components:
+ * - Used by poll-list.tsx for displaying polls
+ * - Referenced in poll-form.tsx for data structure
+ * - Utilized in poll-detail.tsx for single poll view
+ */
+
 export const mockPolls: Poll[] = [
   {
     id: '1',
@@ -77,6 +108,21 @@ export const mockPolls: Poll[] = [
   },
 ];
 
+/**
+ * Retrieves a poll by its ID from the mock data.
+ * 
+ * @description
+ * Helper function to find and return a specific poll from the mock data.
+ * Simulates database lookup functionality during development.
+ * 
+ * @param id - The unique identifier of the poll to retrieve
+ * @returns The matching Poll object or undefined if not found
+ * 
+ * Edge Cases:
+ * - Returns undefined for non-existent poll IDs
+ * - Handles case-sensitive ID matching
+ * - Maintains type safety with Poll interface
+ */
 export function getPollById(id: string): Poll | undefined {
   return mockPolls.find(poll => poll.id === id);
 }
