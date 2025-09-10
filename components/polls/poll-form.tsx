@@ -153,7 +153,7 @@ export default function PollForm({ initialData }: PollFormProps) {
             />
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="pt-6 border-t">
           {error && (
             <div className="text-destructive text-sm mb-2">{error}</div>
           )}
